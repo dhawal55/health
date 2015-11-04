@@ -14,8 +14,8 @@ import (
     "log"
     "net/http"
 
-    "git.nordstrom.net/rfid/health"
-    "git.nordstrom.net/rfid/version"
+    "github.com/dhawal55/health"
+    "github.com/dhawal55/version"
 )
 
 type Dependency1 struct{}
@@ -50,7 +50,9 @@ func main() {
 
     versionMux := version.New(v)
     healthMux := health.New(checkers, v)
+    //Add versionMux to your application mux
     mux.Handle("/", versionMux)
+    //Add healthMux to versionMux to avoid duplicate routes in application mux
     versionMux.Handle("/", healthMux)
 
     log.Fatal(http.ListenAndServe(":8080", mux))
