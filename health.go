@@ -22,7 +22,7 @@ type healthService struct {
 	checksum       string
 }
 
-type healthCheckReponse struct {
+type healthCheckResponse struct {
 	isHealthy       bool
 	OverallHealth   string            `json:"overallHealth"`
 	Version         string            `json:"version"`
@@ -51,7 +51,7 @@ func (s *healthService) registerRoute() *http.ServeMux {
 	return mux
 }
 
-func (s *healthService) getHealthReport() healthCheckReponse {
+func (s *healthService) getHealthReport() healthCheckResponse {
 	var checkItems []healthCheckItem
 	overall := true
 
@@ -77,7 +77,7 @@ func (s *healthService) getHealthReport() healthCheckReponse {
 	}
 
 	hostname, _ := os.Hostname()
-	return healthCheckReponse{
+	return healthCheckResponse{
 		Items:           checkItems,
 		isHealthy:       overall,
 		OverallHealth:   getStatus(overall),

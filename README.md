@@ -1,6 +1,6 @@
 # health
 
-Package 'health' returns a HTTP request multiplexer with a "/health" endpoint that return the application's health.
+Package 'health' returns a HTTP request multiplexer with a "/health" endpoint that returns the application's health.
 
 ## Usage
 

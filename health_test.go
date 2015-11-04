@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"git.nordstrom.net/lab/ip-health/mocks"
+	"github.com/dhawal55/health/mocks"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,22 +17,20 @@ func empty() []string {
 	return []string{}
 }
 
-func getServer(service *HealthService) *httptest.Server {
+func getServer(service *healthService) *httptest.Server {
 	mux := service.registerRoute()
 	return httptest.NewServer(mux)
 }
 
 func Test_Get(t *testing.T) {
 	checker := mocks.HealthChecker{}
-	messages := map[string]interface{}{
-		"foo": "bar",
-	}
+	messages := []string{"foo: bar"}
 	checker.Mock.On("IsHealthy").Return(true, nil, messages)
 
 	version := "1.0"
 	checksum := "checksum"
 
-	server := getServer(&HealthService{
+	server := getServer(&healthService{
 		healthCheckers: []HealthChecker{&checker},
 		version:        version,
 		checksum:       checksum,
@@ -43,13 +41,13 @@ func Test_Get(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, res.StatusCode)
 
-	expected := HealthCheckResponse{
+	expected := healthCheckResponse{
 		OverallHealth: "Healthy",
 		Version:       version,
 		Checksum:      checksum,
-		Items:         []HealthCheckItem{HealthCheckItem{Name: "*mocks.HealthChecker", Status: "Healthy", Error: "", Messages: messages}},
+		Items:         []healthCheckItem{healthCheckItem{Name: "*mocks.HealthChecker", Status: "Healthy", Error: "", Messages: messages}},
 	}
-	var actual HealthCheckResponse
+	var actual healthCheckResponse
 	json.Unmarshal(body, &actual)
 
 	assert.Equal(t, expected.OverallHealth, "Healthy")
@@ -62,18 +60,18 @@ func Test_Get_WithError(t *testing.T) {
 	errMessage := "I failed"
 	checker.Mock.On("IsHealthy").Return(false, errors.New(errMessage), nil)
 
-	server := getServer(&HealthService{healthCheckers: []HealthChecker{&checker}})
+	server := getServer(&healthService{healthCheckers: []HealthChecker{&checker}})
 	res, _ := http.Get(server.URL + "/health")
 	body, _ := ioutil.ReadAll(res.Body)
 	defer res.Body.Close()
 
 	assert.Equal(t, http.StatusInternalServerError, res.StatusCode)
 
-	expected := HealthCheckResponse{
+	expected := healthCheckResponse{
 		OverallHealth: "Unhealthy",
-		Items:         []HealthCheckItem{HealthCheckItem{Name: "*mocks.HealthChecker", Status: "Unhealthy", Error: errMessage, Messages: nil}},
+		Items:         []healthCheckItem{healthCheckItem{Name: "*mocks.HealthChecker", Status: "Unhealthy", Error: errMessage, Messages: nil}},
 	}
-	var actual HealthCheckResponse
+	var actual healthCheckResponse
 	json.Unmarshal(body, &actual)
 
 	assert.Equal(t, expected.OverallHealth, "Unhealthy")
@@ -81,7 +79,7 @@ func Test_Get_WithError(t *testing.T) {
 }
 
 func Test_Get_Cors(t *testing.T) {
-	server := getServer(&HealthService{})
+	server := getServer(&healthService{})
 	defer server.Close()
 
 	client := &http.Client{}
