@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"runtime"
 
-	"git.nordstrom.net/rfid/version"
+	"github.com/dhawal55/version"
 )
 
 // Interface for retrieving health status of various components.
